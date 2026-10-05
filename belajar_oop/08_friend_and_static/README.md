@@ -2,37 +2,45 @@
 
 ## 1. Static Members
 
-Dalam C++, kata kunci `static` di dalam class digunakan untuk mendefinisikan anggota yang menjadi milik class secara global, bukan milik instansiasi objek individual.
+Di C++, keyword `static` di dalem class dipake buat nentuin atribut atau method yang nempel ke class secara global, bukan nempel per masing-masing objek individual.
 
 ### A. Static Member Variable
-- Variabel ini dialokasikan hanya satu kali di memori dan dibagi (shared) oleh seluruh objek dari class tersebut.
-- Harus didefinisikan/diinisialisasi sekali di luar deklarasi class (`int Joint::totalJoints = 0;`).
+- Variabel ini cuma dialokasiin 1 kali di memori dan di-share bareng-bareng sama semua instance objek dari class itu.
+- Wajib didefinisiin/diinisialisasi sekali di luar deklarasi class (`int Joint::totalJoints = 0;`).
 
 ### B. Static Member Function
-- Fungsi yang dapat dipanggil langsung menggunakan nama class tanpa perlu membuat objek (`Joint::getTotalJoints()`).
-- Fungsi static hanya bisa mengakses variabel static dan fungsi static lainnya (tidak memiliki pointer `this`).
+- Fungsi yang bisa langsung dipanggil via nama class tanpa harus repot bikin objeknya dulu (`Joint::getTotalJoints()`).
+- Fungsi static cuma bisa akses variabel static dan fungsi static lainnya (ga punya pointer `this`).
+
+---
 
 ## 2. Konsep Friend (Friend Function & Friend Class)
 
-Secara default, data `private` dan `protected` terisolasi rapat. Namun, terkadang dua class atau satu fungsi utilitas eksternal memerlukan akses langsung ke data privat demi efisiensi atau desain khusus.
+Normalnya data `private` dan `protected` terkunci rapat. Tapi ada kalanya fungsi helper atau class lain butuh akses langsung ke data privat demi performa dan desain khusus.
 
-- **Friend Function**: Fungsi non-member yang dideklarasikan dengan kata kunci `friend` di dalam suatu class. Fungsi ini berhak mengakses semua anggota privat class tersebut.
-- **Friend Class**: Jika `class A` menyatakan `friend class B;`, maka seluruh method di dalam `class B` memiliki izin untuk mengakses anggota privat dari `class A`.
+- **Friend Function**: Fungsi luar (non-member) yang dikasih tiket VIP pake keyword `friend` di dalem class. Fungsi ini bebas ngakses member private class itu.
+- **Friend Class**: Kalo `class A` nulis `friend class B;`, maka semua fungsi di dalem `class B` punya akses bebas ke isi private milik `class A`.
 
-## 3. Penjelasan Alur Program main.cpp
+---
 
-1. `Joint::totalJoints` melacak berapa banyak objek `Joint` yang aktif di memori secara otomatis (bertambah saat constructor dieksekusi, berkurang saat destructor dieksekusi).
-2. Fungsi `inspectJointPrivate(const Joint& j)` membaca atribut privat `jointName` dan `currentAngle` karena sudah diberi hak akses melalui `friend void inspectJointPrivate(...)`.
-3. Class `Motor` dideklarasikan sebagai `friend class Motor;` di dalam `Joint`, sehingga method `applyTorque` milik `Motor` dapat langsung memanipulasi variabel privat `currentAngle` dari objek `Joint`.
+## 3. Bedah Alur File main.cpp
 
-## 4. Cara Kompilasi dan Eksekusi
+1. `Joint::totalJoints` otomatis ngitung jumlah objek `Joint` yang aktif di memori (nambah pas constructor kepanggil, ngurang pas destructor kepanggil).
+2. Fungsi `inspectJointPrivate(const Joint& j)` bisa baca variabel privat `jointName` dan `currentAngle` karena udah dapet izin VIP via `friend void inspectJointPrivate(...)`.
+3. Class `Motor` dideklarasiin sebagai `friend class Motor;` di `Joint`, jadi method `applyTorque` milik `Motor` bisa langsung ngubah data privat `currentAngle` objek `Joint`.
+
+---
+
+## 4. Cara Nyoba & Output
+
+Jalankan perintah ini di terminal:
 
 ```bash
 g++ -std=c++17 main.cpp -o main.exe
 ./main.exe
 ```
 
-### Output yang Diharapkan:
+### Expected Output:
 ```text
 Jumlah awal joint: 0
 Jumlah joint sekarang: 2

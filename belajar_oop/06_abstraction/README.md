@@ -1,37 +1,38 @@
 # Materi 06: Abstraction and Interfaces
 
-## 1. Konsep Dasar
+## 1. Konsep Inti
 
-Abstraction (Abstraksi) adalah pilar OOP yang berfokus pada menyembunyikan detail implementasi internal yang rumit dan hanya memperlihatkan antarmuka (interface) esensial kepada pengguna class.
+Abstraction (Abstraksi) adalah cara nyembunyiin detail teknis yang ribet dan cuma nampilin tombol atau fungsi pentingnya aja.
 
-Contoh nyata: Saat Anda mengendarai mobil, Anda cukup tahu cara menginjak pedal gas dan memutar setir, tanpa harus memikirkan proses pembakaran bahan bakar di dalam mesin.
+Contoh simpel: Pas nyalain TV pake remote control, kita cukup neken tombol Power tanpa perlu pusing mikirin gimana gelombang sinyal inframerah atau sirkuit internalnya bekerja.
 
-## 2. Pure Virtual Function dan Abstract Class
-
-- **Pure Virtual Function**: Fungsi virtual yang tidak memiliki implementasi (body) pada base class dan dideklarasikan dengan sintaks `= 0;`.
+### Istilah Penting:
+- **Pure Virtual Function**: Fungsi yang berujung `= 0;` dan sengaja ga dikasih isi body di class induk. Ini adalah "kontrak wajib" yang harus diisi sama class anak.
   ```cpp
   virtual void calibrate() = 0;
   ```
-- **Abstract Class**: Class apa pun yang memiliki minimal satu pure virtual function. Abstract class **tidak dapat dibuat menjadi objek secara langsung** (`Sensor s;` akan menghasilkan error).
-- **Interface**: Class yang seluruh method-nya adalah pure virtual functions dan bertindak murni sebagai "kontrak" yang wajib dipenuhi oleh class turunan.
+- **Abstract Class / Interface**: Class yang punya minimal satu pure virtual function. Class ini **ga bisa diinstansiasi langsung jadi objek**. Tujuannya murni sebagai standarisasi kontrak buat class turunannya.
 
-## 3. Penjelasan Alur Program main.cpp
+---
 
-1. Class `Sensor` adalah abstract class yang mendefinisikan 3 kontrak antarmuka:
-   - `calibrate()`
-   - `readData()`
-   - `getSensorName()`
-2. `CameraVision` dan `IMUSensor` adalah concrete class yang mengimplementasikan ketiga method kontrak tersebut.
-3. Fungsi `runDiagnostic(Sensor* sensor)` dapat menerima objek turunan sensor apa pun. Fungsi ini cukup tahu cara berinteraksi dengan antarmuka `Sensor` tanpa peduli detail teknis sensor kamera ataupun IMU.
+## 2. Bedah Alur File main.cpp
 
-## 4. Cara Kompilasi dan Eksekusi
+1. Bikin interface `Sensor` yang netapin kontrak standar: semua sensor wajib punya `calibrate()`, `readData()`, dan `getSensorName()`.
+2. Class `CameraVision` dan `IMUSensor` ngasih implementasi nyata sesuai cara kerja hardware sensor masing-masing.
+3. Bikin fungsi diagnosa umum `runDiagnostic(Sensor* sensor)`. Fungsi ini bisa nerima sensor apa pun dan langsung jalanin diagnosa tanpa perlu tau detail fisik sensornya.
+
+---
+
+## 3. Cara Nyoba & Output
+
+Jalankan perintah ini di terminal:
 
 ```bash
 g++ -std=c++17 main.cpp -o main.exe
 ./main.exe
 ```
 
-### Output yang Diharapkan:
+### Expected Output:
 ```text
 --- Diagnostik Sensor: Camera Vision HD ---
 [CameraVision] Kalibrasi white balance dan FOV selesai.

@@ -1,54 +1,50 @@
 # Materi 02: Constructor and Destructor
 
-## 1. Konsep Dasar
+## 1. Konsep Inti
 
-Dalam C++, lifecycle (daur hidup) sebuah objek dikendalikan oleh fungsi khusus bernama Constructor dan Destructor:
+Setiap objek di C++ punya siklus hidup (lahir -> dipake -> musnah):
 
-- **Constructor**: Fungsi khusus dengan nama yang sama persis dengan nama class dan tidak memiliki return value. Constructor dipanggil secara otomatis tepat saat objek dibuat untuk menginisialisasi atribut atau menyiapkan resource awal.
-- **Destructor**: Fungsi khusus yang diawali tanda tilde (`~`) diikuti nama class (`~ClassName()`). Destructor dipanggil secara otomatis saat masa hidup objek selesai (objek keluar dari scope atau dihapus dengan `delete`) untuk membebaskan alokasi memori atau menutup resource.
+- **Constructor**: Fungsi khusus yang auto-dieksekusi pas objek "lahir" (dibuat). Fungsinya buat ngasih nilai inisialisasi awal ke variabel biar memorinya ga nyimpen nilai sampah/acak.
+- **Destructor**: Fungsi khusus yang auto-dieksekusi pas objek "mati" (keluar dari scope kurung kurawal atau didelete). Fungsinya buat beres-beres resource memori biar ga kena memory leak.
 
-## 2. Jenis-Jenis Constructor
+---
 
-### A. Default Constructor
-Constructor yang tidak menerima parameter atau semua parameternya memiliki default value.
+## 2. Tiga Jenis Constructor Utama
+
+1. **Default Constructor**: Dipanggil pas bikin objek polosan tanpa ngasih argumen (`Robot r1;`).
+2. **Parameterized Constructor**: Dipanggil pas ngirim argumen nilai awal spesifik (`Robot r2("Ichiro-Striker", 7);`).
+3. **Copy Constructor**: Dipanggil pas cloning/duplikasi objek yang udah ada (`Robot r3 = r2;`).
+
+### Best Practice: Member Initializer List
+Di C++, inisialisasi variabel constructor paling rapi dan cepet itu pake format titik dua (`:`) sebelum isi kurung kurawal:
 ```cpp
-Robot() : name("Unknown"), id(0) {}
+Robot(std::string rName, int rId) : name(rName), id(rId) {
+    // Tubuh constructor
+}
 ```
+Cara ini lebih optimal daripada assignment manual di dalam body `{ name = rName; }`.
 
-### B. Parameterized Constructor
-Constructor yang menerima argumen untuk menginisialisasi atribut dengan nilai spesifik saat objek dibuat.
-```cpp
-Robot(std::string rName, int rId) : name(rName), id(rId) {}
-```
+---
 
-### C. Copy Constructor
-Constructor yang digunakan untuk membuat objek baru sebagai salinan dari objek yang sudah ada dengan tipe yang sama.
-```cpp
-Robot(const Robot& other) : name(other.name + "_Clone"), id(other.id + 100) {}
-```
+## 3. Bedah Alur File main.cpp
 
-### Member Initializer List
-Sintaks `: name(rName), id(rId)` disebut *Member Initializer List*. Teknik ini lebih cepat dan efisien daripada melakukan assignment di dalam tubuh kurung `{ name = rName; id = rId; }` karena atribut diinisialisasi langsung saat dialokasikan.
+1. Bikin 3 objek di awal: `r1` (default), `r2` (berparameter), dan `r3` (copy constructor dari `r2`).
+2. Masuk ke blok scope lokal `{ ... }`, bikin objek sementara `rTemp`.
+3. Pas program ngelewatin kurung kurawal penutup `}`, `rTemp` langsung dimusnahin dan memicu Destructor `~Robot()` duluan.
+4. Di akhir fungsi `main()`, objek `r3`, `r2`, dan `r1` bakal dihancurin otomatis dengan urutan LIFO (Last-In First-Out / kebalikan dari urutan dibuat).
 
-## 3. Penjelasan Alur Program main.cpp
+---
 
-1. **Pembuatan `r1`**: Memanggil Default Constructor karena tanpa parameter.
-2. **Pembuatan `r2`**: Memanggil Parameterized Constructor dengan nama `"Ichiro-Striker"` dan ID `7`.
-3. **Pembuatan `r3 = r2`**: Memanggil Copy Constructor, menghasilkan robot baru dengan nama `"Ichiro-Striker_Clone"` dan ID `107`.
-4. **Scope Blok `{ ... }`**:
-   - `rTemp` dibuat di dalam blok scope terbatas.
-   - Saat alur program melewati tanda kurung kurawal penutup `}`, `rTemp` langsung dihancurkan dan memicu pemanggilan Destructor `~Robot()` miliknya terlebih dahulu.
-5. **Akhir `main()`**:
-   - Objek `r3`, `r2`, dan `r1` dihancurkan secara berurutan dengan urutan terbalik dari pembuatannya (LIFO - Last In, First Out).
+## 4. Cara Nyoba & Output
 
-## 4. Cara Kompilasi dan Eksekusi
+Jalankan perintah ini di terminal:
 
 ```bash
 g++ -std=c++17 main.cpp -o main.exe
 ./main.exe
 ```
 
-### Output yang Diharapkan:
+### Expected Output:
 ```text
 === Scope Awal ===
 [Constructor Default] Robot baru dibuat!

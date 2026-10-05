@@ -1,52 +1,39 @@
 # Materi 03: Encapsulation and Data Hiding
 
-## 1. Konsep Dasar
+## 1. Konsep Inti
 
-Encapsulation (Pembungkusan) adalah pilar OOP yang menggabungkan data (variabel) dan method (fungsi yang beroperasi pada data tersebut) ke dalam satu wadah (class), sekaligus menyembunyikan detail internal dari akses langsung pihak luar.
+Encapsulation intinya ngebungkus dan ngunci variabel penting ke dalam status `private` biar ga bisa diotak-atik sembarangan dari luar class.
 
-### Mengapa Encapsulation Sangat Penting?
-1. **Integritas Data (Data Protection)**: Mencegah manipulasi variabel secara tidak sah atau tidak logis (misal: saldo bank tidak boleh bernilai negatif secara sembarangan).
-2. **Fleksibilitas & Maintainability**: Implementasi internal class dapat diubah sewaktu-waktu tanpa merusak kode luar yang memanggilnya.
-3. **Read-Only / Write-Only Access**: Mengontrol variabel mana yang hanya boleh dibaca (hanya ada Getter) atau hanya boleh diubah (hanya ada Setter).
+### Kenapa Butuh Banget Ini?
+Bayangin kalo ada class rekening bank (`BankAccount`). Kalo variabel `balance` (saldo) dibiarin `public`, siapa aja di fungsi `main()` bisa nulis `account.balance = -99999999;` dan ngerusak data saldo gitu aja.
 
-## 2. Implementasi Getter dan Setter
+Solusinya pake Encapsulation:
+1. Variabel `balance` disembunyiin rapat di blok `private:`.
+2. Sediain jalur resmi berupa **Getter** buat baca nilai (misal `getBalance()`).
+3. Sediain jalur resmi berupa **Setter / Method Transaksi** buat ngubah nilai pake validasi aturan bisnis (misal `withdraw()`, saldo ga bakal bisa ditarik kalo uang ga mencukupi).
 
-- **Getter**: Method publik dengan keyword `const` yang mengembalikan nilai atribut privat tanpa mengubahnya.
-- **Setter**: Method publik yang menerima argumen baru dan memvalidasinya sebelum disimpan ke atribut privat.
+---
 
-```cpp
-class BankAccount {
-private:
-    double balance; // Tidak bisa diakses langsung dari main()
+## 2. Bedah Alur File main.cpp
 
-public:
-    double getBalance() const {
-        return balance;
-    }
+1. Bikin rekening dengan nomor `"ICHIRO-BANK-001"` dan saldo awal `Rp 1.000.000`.
+2. Baca saldo via `account.getBalance()`.
+3. Setor `Rp 500.000` via `account.deposit()`. Saldo naik jadi `Rp 1.500.000`.
+4. Tarik `Rp 300.000` via `account.withdraw()`. Saldo tersisa `Rp 1.200.000`.
+5. Coba tarik `Rp 2.000.000`. Karena saldo ga cukup, method otomatis nolak transaksi sehingga saldo rekening tetep aman.
 
-    void deposit(double amount) {
-        if (amount > 0) { // Validasi logika bisnis
-            balance += amount;
-        }
-    }
-};
-```
+---
 
-## 3. Penjelasan Alur Program main.cpp
+## 3. Cara Nyoba & Output
 
-1. Atribut `accountNumber` dan `balance` dideklarasikan di bawah blok `private:`.
-2. Pada `main()`, kita tidak dapat menulis `account.balance = 500;` karena compiler akan menghasilkan error kompilasi (proteksi akses).
-3. Untuk mengubah saldo, program memanggil method `deposit(500000)` dan `withdraw(300000)`.
-4. Method `withdraw(2000000)` menolak transaksi karena jumlah penarikan lebih besar dari sisa saldo akun, sehingga integritas data akun tetap terjaga.
-
-## 4. Cara Kompilasi dan Eksekusi
+Jalankan perintah ini di terminal:
 
 ```bash
 g++ -std=c++17 main.cpp -o main.exe
 ./main.exe
 ```
 
-### Output yang Diharapkan:
+### Expected Output:
 ```text
 Nomor Rekening : ICHIRO-BANK-001
 Saldo Awal     : Rp1000000

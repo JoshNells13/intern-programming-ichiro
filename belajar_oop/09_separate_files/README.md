@@ -1,15 +1,15 @@
 # Materi 09: Memisahkan Class ke Banyak File (Multi-File Project)
 
-## 1. Mengapa Perlu Memecah File?
+## 1. Kenapa Mesti Dipecah Banyak File?
 
-Dalam proyek profesional berskala menengah hingga besar, menulis seluruh class di dalam satu file `main.cpp` akan menimbulkan masalah:
-- File menjadi sangat panjang dan sulit dinavigasi.
-- Terjadi konflik nama (naming collision) dan duplikasi kode.
-- Waktu kompilasi menjadi lambat karena perubahan kecil memicu kompilasi ulang seluruh kode program.
+Di proyek real-world berskala menengah sampai gede, nulis semua class numpuk di satu file `main.cpp` bakal bikin kacau:
+- File jadi kepanjangan dan ribet dinavigasi.
+- Gampang bentrok nama fungsi/variabel (*naming collision*) dan rawan duplikasi kode.
+- Waktu kompilasi lambat parah karena ubah dikit aja harus re-compile semua baris dari awal.
 
-Standar industri C++ memisahkan kode menjadi 2 jenis file untuk setiap class:
-1. **Header File (`.hpp` atau `.h`)**: Berisi deklarasi antarmuka class (nama class, atribut, dan prototype method). File ini menjadi "kontrak" yang di-include oleh file lain.
-2. **Source File (`.cpp`)**: Berisi implementasi detail dari setiap method yang telah dideklarasikan di header file.
+Standar industri di C++ memisahkan setiap class jadi 2 jenis file:
+1. **Header File (`.hpp` atau `.h`)**: Isinya deklarasi antarmuka class (nama class, variabel, dan prototype method). File ini jadi "kontrak" yang di-include file lain.
+2. **Source File (`.cpp`)**: Isinya implementasi logika detail dari tiap method yang udah dideklarasikan di header.
 
 ---
 
@@ -22,7 +22,7 @@ Standar industri C++ memisahkan kode menjadi 2 jenis file untuk setiap class:
 ├── StrikerRobot.hpp   <- Deklarasi Derived Class StrikerRobot
 ├── StrikerRobot.cpp   <- Implementasi Derived Class StrikerRobot
 ├── main.cpp           <- Entry point program
-└── README.md          <- Dokumentasi materi
+└── README.md          <- Catatan materi
 ```
 
 ---
@@ -30,7 +30,7 @@ Standar industri C++ memisahkan kode menjadi 2 jenis file untuk setiap class:
 ## 3. Konsep Penting
 
 ### A. Include Guards (`#ifndef`, `#define`, `#endif`)
-Untuk mencegah pendefinisian class ganda jika sebuah header di-include lebih dari satu kali oleh file yang berbeda, selalu gunakan include guard atau `#pragma once`:
+Biar ga terjadi eror pendefinisian class ganda kalo satu file header di-include beberapa kali oleh file berbeda, selalu pasang include guard (atau `#pragma once`):
 
 ```cpp
 #ifndef ROBOT_HPP
@@ -42,48 +42,48 @@ Untuk mencegah pendefinisian class ganda jika sebuah header di-include lebih dar
 ```
 
 ### B. Scope Resolution Operator (`::`)
-Pada file `.cpp`, gunakan operator `NamaClass::` untuk menunjukkan bahwa fungsi tersebut adalah implementasi dari method milik class tertentu:
+Di file `.cpp`, pake tanda `NamaClass::` buat negasin kalo fungsi itu adalah implementasi milik method class yang bersangkutan:
 
 ```cpp
 #include "Robot.hpp"
 
-// Mengisi implementasi method displayInfo milik class Robot
+// Implementasi fungsi displayInfo milik class Robot
 void Robot::displayInfo() const {
-    // Logika method
+    // Logika method di sini
 }
 ```
 
-### C. Penggunaan Tanda Petik Ganda `""` vs Kurung Siku `<>`
-- `#include <iostream>`: Untuk header standar bawaan compiler C++.
-- `#include "Robot.hpp"`: Untuk header lokal buatan sendiri di dalam proyek.
+### C. Bedanya Include `""` vs `<>`
+- `#include <iostream>`: Buat header library bawaan compiler / standar C++.
+- `#include "Robot.hpp"`: Buat file header lokal buatan sendiri di dalam folder project.
 
 ---
 
-## 4. Penjelasan Alur Program main.cpp
+## 4. Bedah Alur File main.cpp
 
-1. `main.cpp` hanya perlu menyertakan file header: `#include "Robot.hpp"` dan `#include "StrikerRobot.hpp"`.
-2. Program membuat objek `baseBot` dan `strikerBot`, kemudian menjalankan fungsi masing-masing.
-3. Objek dimasukkan ke dalam `std::vector<std::unique_ptr<Robot>>` untuk membuktikan bahwa Runtime Polymorphism tetap bekerja optimal meskipun class berada di file yang terpisah.
+1. `main.cpp` cuma perlu include file header doang: `#include "Robot.hpp"` dan `#include "StrikerRobot.hpp"`.
+2. Bikin objek `baseBot` dan `strikerBot`, lalu jalanin fungsi masing-masing.
+3. Objek dimasukin ke `std::vector<std::unique_ptr<Robot>>` buat ngebuktiin kalo *Runtime Polymorphism* tetep jalan mulus walau class-nya dipisah ke file yang berbeda.
 
 ---
 
-## 5. Cara Kompilasi Multi-File
+## 5. Cara Compile Multi-File & Output
 
-Ketika sebuah program terdiri dari beberapa file `.cpp`, compiler harus mengikutsertakan seluruh file `.cpp` tersebut agar linker dapat menghubungkan deklarasi dengan implementasinya.
+Kalo program dipecah jadi banyak file `.cpp`, compiler harus dikasih tau semua list file `.cpp`-nya biar linker bisa nyambungin deklarasi sama implementasinya.
 
-### Perintah Kompilasi GCC / G++:
+### Perintah Compile GCC / G++:
 
 ```bash
-# Opsi 1: Kompilasi seluruh file .cpp secara bersamaan
+# Opsi 1: Tulis satu-satu semua file .cpp
 g++ -std=c++17 main.cpp Robot.cpp StrikerRobot.cpp -o main.exe
 ./main.exe
 
-# Opsi 2: Menggunakan wildcard (*.cpp)
+# Opsi 2: Pake wildcard (*.cpp) biar praktis
 g++ -std=c++17 *.cpp -o main.exe
 ./main.exe
 ```
 
-### Output yang Diharapkan:
+### Expected Output:
 ```text
 [Robot] Nama: Ichiro-Base | Baterai: 75%
 Ichiro-Base di-charge +15% | Sisa: 90%

@@ -1,50 +1,44 @@
 # Materi 04: Inheritance (Pewarisan)
 
-## 1. Konsep Dasar
+## 1. Konsep Inti
 
-Inheritance adalah pilar OOP yang memungkinkan suatu class (Child/Derived Class) mewarisi atribut dan method dari class lain (Parent/Base Class).
+Inheritance (Pewarisan) itu cara bikin class baru (child class) yang otomatis mewarisi semua variabel dan method dari class yang udah ada (parent class).
 
-### Keuntungan Inheritance
-- **Reusabilitas Kode (Code Reusability)**: Tidak perlu menulis ulang logika umum yang sama di banyak class.
-- **Ekstensibilitas (Extensibility)**: Memudahkan penambahan fitur baru dengan memperluas class yang sudah ada.
-- **Hierarki yang Jelas**: Membangun hubungan logis berbasis "is-a" (contoh: StrikerRobot *is a* Robot).
+### Keuntungan Utama:
+- **Hemat Baris Kode (DRY)**: Ga perlu nulis ulang atribut umum kayak `name` dan `battery` di tiap jenis robot.
+- **Hierarki Jelas & Rapi**: Parent class (`Robot`) megang data dasar umum, sedangkan child class (`StrikerRobot`, `GoalkeeperRobot`) tinggal nambahin jurus/fitur unik masing-masing.
 
-## 2. Tingkat Akses: protected
+---
 
-| Access Specifier | Akses dalam Class Sendiri | Akses di Child Class | Akses di Luar Class / main() |
-| :--- | :---: | :---: | :---: |
-| `public` | Ya | Ya | Ya |
-| `protected` | Ya | Ya | Tidak |
-| `private` | Ya | Tidak | Tidak |
+## 2. Hak Akses: protected
 
-Dengan menggunakan `protected`, variabel `name` dan `battery` milik class `Robot` dapat dibaca/diubah langsung oleh `StrikerRobot` tanpa harus menjadikannya `public` untuk umum.
+Kalo child class butuh izin buat baca/ubah variabel milik parent class, tapi variabel itu tetep harus dikunci rapat dari akses liar di luar (misal dari `main()`), pake keyword `protected:`:
 
-## 3. Constructor Chaining
+- `public`: Bebas diakses dari mana aja.
+- `protected`: Cuma bisa diakses oleh parent class dan child class turunannya.
+- `private`: Eksklusif cuma bisa diakses oleh class itu sendiri.
 
-Ketika objek derived class dibuat:
-1. Constructor base class dieksekusi terlebih dahulu untuk menyiapkan data dasar.
-2. Constructor derived class dieksekusi setelahnya untuk menyiapkan data tambahannya.
+---
 
-```cpp
-StrikerRobot(std::string rName, int rBattery, int power)
-    : Robot(rName, rBattery), kickPower(power) {}
-```
+## 3. Bedah Alur File main.cpp
 
-## 4. Penjelasan Alur Program main.cpp
+1. Parent class `Robot` nentuin variabel `name`, `battery`, dan method `status()`.
+2. Class `StrikerRobot` mewarisi `Robot` dan nambahin skill nendang `kickBall()`.
+3. Class `GoalkeeperRobot` mewarisi `Robot` dan nambahin skill diving `diveToSave()`.
+4. Di `main()`, objek `striker` langsung bisa manggil `striker.status()` (fungsi warisan dari induk) dan `striker.kickBall()` (fungsi unik miliknya sendiri).
 
-1. Class `Robot` berfungsi sebagai parent class dengan method `status()`.
-2. `StrikerRobot` mewarisi `Robot`, menambahkan atribut `kickPower` dan fungsi spesifik `kickBall()`.
-3. `GoalkeeperRobot` mewarisi `Robot`, menambahkan atribut `saveReactionMs` dan fungsi `diveToSave()`.
-4. Objek `striker` dapat langsung memanggil method warisan `striker.status()` sekaligus method khususnya `striker.kickBall()`.
+---
 
-## 5. Cara Kompilasi dan Eksekusi
+## 4. Cara Nyoba & Output
+
+Jalankan perintah ini di terminal:
 
 ```bash
 g++ -std=c++17 main.cpp -o main.exe
 ./main.exe
 ```
 
-### Output yang Diharapkan:
+### Expected Output:
 ```text
 Robot: Ichiro-Striker | Baterai: 90%
 Ichiro-Striker menendang bola dengan kekuatan 250 N!

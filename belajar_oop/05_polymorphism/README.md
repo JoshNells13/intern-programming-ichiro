@@ -1,34 +1,36 @@
 # Materi 05: Polymorphism (Polimorfisme)
 
-## 1. Konsep Dasar
+## 1. Konsep Inti
 
-Polymorphism (dari bahasa Yunani: "banyak bentuk") memungkinkan antarmuka yang sama diperlakukan secara seragam, namun menghasilkan perilaku berbeda sesuai tipe objek konkret saat runtime.
+Polymorphism artinya "banyak bentuk". Konsep ini bikin kita bisa nampung berbagai macam objek anak yang beda-beda ke dalam satu wadah/tipe pointer induk yang sama. Pas method-nya dipanggil, C++ bakal otomatis manggil perilaku unik dari masing-masing objek aslinya (*Runtime Polymorphism*).
 
-Dalam C++, polimorfisme terbagi menjadi dua:
-1. **Compile-Time Polymorphism (Static Binding)**: Function Overloading dan Operator Overloading.
-2. **Runtime Polymorphism (Dynamic Binding)**: Virtual Functions yang dipanggil melalui pointer atau reference base class.
+### Keyword Penting:
+- **`virtual`**: Ditulis di fungsi parent class. Tujuannya ngasih tau compiler C++ biar nyari fungsi milik child class pas program lagi jalan (*Dynamic Binding*).
+- **`override`**: Ditulis di fungsi child class buat mastiin fungsi itu beneran nimpa fungsi parent (biar ga salah ketik nama/parameter).
+- **`virtual ~Robot() = default;`**: Wajib hukumnya di parent class! Biar pas objek child dihapus dari pointer parent, proses bersih-bersih memorinya tuntas dan ga ada kebocoran memori.
 
-## 2. Kata Kunci Utama
+---
 
-- **`virtual`**: Ditulis pada deklarasi fungsi di base class untuk mengaktifkan Dynamic Dispatch via vtable (Virtual Method Table).
-- **`override`**: Ditulis pada child class untuk memastikan method tersebut benar-benar menimpa (override) fungsi virtual dari base class. Jika ada salah ketik nama atau tipe parameter, compiler akan langsung memberi tahu error.
-- **`virtual ~BaseClass() = default;`**: Wajib didefinisikan pada base class agar ketika objek child dihapus melalui pointer base (`delete basePtr`), destructor milik child class juga ikut dipanggil (menghindari memory leak).
+## 2. Bedah Alur File main.cpp
 
-## 3. Penjelasan Alur Program main.cpp
+1. Punya base class `Robot` dengan fungsi `virtual void performAction()`.
+2. Tiga child class (`StrikerRobot`, `DefenderRobot`, `RefereeRobot`) masing-masing meng-override fungsi tersebut dengan aksi khas mereka.
+3. Di `main()`, bikin satu wadah vector bertipe pointer induk: `std::vector<std::unique_ptr<Robot>> team`.
+4. Masukin ketiga jenis robot yang beda itu ke dalam satu vector yang sama.
+5. Pas looping manggil `member->performAction()`, C++ secara cerdas manggil aksi unik tiap robot: Striker nembak bola, Defender ngeblok lawan, dan Wasit niup peluit.
 
-1. Base class `Robot` mendefinisikan method `virtual void performAction() const`.
-2. Tiga class turunan (`StrikerRobot`, `DefenderRobot`, `RefereeRobot`) masing-masing meng-override `performAction()`.
-3. Di dalam `main()`, sebuah vektor smart pointer `std::vector<std::unique_ptr<Robot>>` menampung ketiga tipe robot tersebut dalam wadah bertipe seragam (`Robot*`).
-4. Saat iterasi `member->performAction()` dieksekusi, C++ secara otomatis mendeteksi tipe objek asli di memori dan memanggil method yang sesuai untuk masing-masing robot.
+---
 
-## 4. Cara Kompilasi dan Eksekusi
+## 3. Cara Nyoba & Output
+
+Jalankan perintah ini di terminal:
 
 ```bash
 g++ -std=c++17 main.cpp -o main.exe
 ./main.exe
 ```
 
-### Output yang Diharapkan:
+### Expected Output:
 ```text
 Striker berlari dan menembak ke gawang musuh!
 Defender memblokir pergerakan lawan!
