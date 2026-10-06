@@ -1,4 +1,4 @@
-# Materi 03: Encapsulation and Data Hiding
+# Pilar OOP: Encapsulation (Enkapsulasi)
 
 ## 1. Konsep Inti
 

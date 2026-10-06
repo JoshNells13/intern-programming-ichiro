@@ -1,4 +1,4 @@
-# Materi 05: Polymorphism (Polimorfisme)
+# Pilar OOP: Polymorphism (Polimorfisme)
 
 ## 1. Konsep Inti
 

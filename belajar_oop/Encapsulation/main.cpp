@@ -4,21 +4,21 @@
 class BankAccount {
 private:
     std::string accountNumber;
-    double balance;
+    long long balance;
 
 public:
-    BankAccount(std::string accNum, double initialBalance)
+    BankAccount(std::string accNum, long long initialBalance)
         : accountNumber(accNum), balance(initialBalance < 0 ? 0 : initialBalance) {}
 
     std::string getAccountNumber() const {
         return accountNumber;
     }
 
-    double getBalance() const {
+    long long getBalance() const {
         return balance;
     }
 
-    void deposit(double amount) {
+    void deposit(long long amount) {
         if (amount > 0) {
             balance += amount;
             std::cout << "Deposit: Rp" << amount << " | Saldo baru: Rp" << balance << "\n";
@@ -27,7 +27,7 @@ public:
         }
     }
 
-    bool withdraw(double amount) {
+    bool withdraw(long long amount) {
         if (amount <= 0) {
             std::cout << "Gagal tarik dana: Nilai tidak valid.\n";
             return false;

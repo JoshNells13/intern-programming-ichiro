@@ -1,4 +1,4 @@
-# Materi 06: Abstraction and Interfaces
+# Pilar OOP: Abstraction (Abstraksi)
 
 ## 1. Konsep Inti
 

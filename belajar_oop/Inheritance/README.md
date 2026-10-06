@@ -1,4 +1,4 @@
-# Materi 04: Inheritance (Pewarisan)
+# Pilar OOP: Inheritance (Pewarisan)
 
 ## 1. Konsep Inti
 
