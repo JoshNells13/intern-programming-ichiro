@@ -4,8 +4,7 @@ using namespace std;
 
 class Robot{
     private:
-
-
+    
     protected :
         string nama;
         int batrei;
@@ -47,11 +46,18 @@ class RoboGula : public Robot{
 
 int main(){
 
-    Robot* robot1 = new RoboAmba("Ambatukam-001",100);
-    Robot* robot2 = new RoboGula("Sweet-022",100);
+    // Robot* robot1 = new RoboAmba("Ambatukam-001",100);
+    // Robot* robot2 = new RoboGula("Sweet-022",100);
 
-    robot1->aksi();
-    robot2->aksi();
+    // robot1->aksi();
+    // robot2->aksi();
+
+    RoboAmba amba("MAX AMBA 001", 100);
+    RoboGula gula("SWEET 022",100);
+
+    amba.aksi();
+    gula.aksi();
+
   
     
 
