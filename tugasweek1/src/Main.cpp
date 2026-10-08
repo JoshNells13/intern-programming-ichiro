@@ -1,13 +1,24 @@
 #include "Simulator.hpp"
-#include "ConfigLoader.hpp"
+#include <iostream>
 
 int main() {
-    SimConfig cfg = ConfigLoader::loadFromFile("config.txt");
+    double rx, ry, rTheta;
+    double bx, by;
 
-    Striker striker(cfg.robotX, cfg.robotY, cfg.robotOrientation);
-    Ball ball(cfg.ballX, cfg.ballY);
+    std::cout << "Masukkan posisi Robot (x y): ";
+    std::cin >> rx >> ry;
 
-    Simulator sim(striker, ball, cfg.maxTicks);
+    std::cout << "Masukkan sudut hadap Robot (derajat): ";
+    std::cin >> rTheta;
+
+    std::cout << "Masukkan posisi Bola (x y): ";
+    std::cin >> bx >> by;
+    std::cout << "\n";
+
+    Striker striker(rx, ry, rTheta);
+    Ball ball(bx, by);
+
+    Simulator sim(striker, ball, 30);
     sim.run();
 
     return 0;

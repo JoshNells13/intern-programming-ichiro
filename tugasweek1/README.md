@@ -17,7 +17,8 @@ Proyek simulasi robot soccer humanoid 2D berbasis terminal untuk robot Striker (
 - **Exception Handling**: Penanganan aksi tidak valid melalui try-catch (misalnya saat robot mencoba menendang bola yang belum berada di posisi depan melalui `InvalidKickException`).
 
 ### Level 3: Extra Features
-- **File Konfigurasi (`config.txt`)**: Penentuan posisi awal Striker dan Bola melalui file teks tanpa perlu proses kompilasi ulang.
+- **Interactive User Input**: Input interaktif koordinat awal robot, sudut hadap, dan posisi bola saat program dijalankan.
+- **File Konfigurasi (`config.txt`)**: Penentuan posisi awal Striker dan Bola melalui file teks.
 - **State Pattern**: Pengelolaan alur perilaku Striker menggunakan State Pattern (`SearchState` -> `ApproachState` -> `AlignState` -> `KickState`).
 - **Arah Tendangan**: Kemampuan eksekusi tendangan lurus maupun miring (diagonal).
 - **Unit Testing**: Pengujian independen untuk kalkulasi matematika vektor dan fisika perlambatan bola.
@@ -38,6 +39,13 @@ g++ -Iinclude src/Ball.cpp src/CameraSensor.cpp src/ConfigLoader.cpp src/Field.c
 
 # Menjalankan di CMD / PowerShell
 main.exe
+```
+
+Saat program dijalankan, masukkan koordinat sesuai permintaan di terminal:
+```text
+Masukkan posisi Robot (x y): -1.5 0.0
+Masukkan sudut hadap Robot (derajat): 0.0
+Masukkan posisi Bola (x y): 1.0 -0.5
 ```
 
 ### 2. Unit Testing
@@ -66,11 +74,11 @@ g++ -Iinclude src/UnitTest.cpp src/Ball.cpp -o test.exe
 stateDiagram-v2
     [*] --> SearchState : Mulai Simulasi
     SearchState --> ApproachState : Bola Terdeteksi oleh Sensor Kamera (@)
-    SearchState --> SearchState : Berputar 45° dan Menjelajah Lapangan
+    SearchState --> SearchState : Berputar dan Menjelajah Lapangan
     ApproachState --> SearchState : Bola Hilang dari Pandangan
-    ApproachState --> AlignState : Bola Tepat Berada di Depan Robot
-    ApproachState --> ApproachState : Bergerak Mendekati Bola
-    AlignState --> KickState : Sudut Hadap Mengarah ke Gawang Lawan
+    ApproachState --> AlignState : Robot Berada Tepat di Belakang Bola
+    ApproachState --> ApproachState : Bergerak Mendekati Posisi Tembak
+    AlignState --> KickState : Bola Tepat di Depan Robot Menghadap Gawang
     AlignState --> ApproachState : Posisi Bola Berubah
     KickState --> [*] : Menendang Bola Masuk Gawang (GOAL!)
 ```
@@ -148,24 +156,10 @@ classDiagram
 
 ---
 
-## Format File `config.txt`
-
-Posisi awal robot dan bola dapat diatur pada file `config.txt`:
-```ini
-ROBOT_X=-1.0
-ROBOT_Y=-0.5
-ROBOT_ORIENTATION=90.0
-BALL_X=0.5
-BALL_Y=0.5
-MAX_TICKS=30
-```
-
----
-
 ## Pernyataan Penggunaan AI
 
 AI digunakan sebagai asisten pemrograman untuk membantu:
 - Penataan struktur modular C++ dan header `.hpp`.
-- Perhitungan geometris area vision kamera segitiga 8 arah.
+- Perhitungan geometris area vision kamera segitiga.
 - Pembuatan visualisasi diagram Mermaid pada dokumentasi.
 Seluruh logika inti algoritma, validasi OOP, enkapsulasi, dan eksekusi program telah diverifikasi dan diuji sesuai spesifikasi tugas.
