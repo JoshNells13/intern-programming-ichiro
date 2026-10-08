@@ -1,18 +1,68 @@
 #include "Striker.hpp"
+#include "StrikerState.hpp"
 #include "Field.hpp"
-#include <cmath>
 #include <iostream>
 
 Striker::Striker()
-    : Robot(), ballVisible(false), lastKnownBallPos(0, 0), ballInFront(false), nextAction(RobotAction::SEARCH_BALL) {}
+    : Robot(), ballVisible(false), lastKnownBallPos(0, 0), ballInFront(false),
+      currentState(new SearchState()) {}
 
 Striker::Striker(double x, double y, double orientationDeg)
-    : Robot(x, y, orientationDeg), ballVisible(false), lastKnownBallPos(0, 0), ballInFront(false), nextAction(RobotAction::SEARCH_BALL) {}
+    : Robot(x, y, orientationDeg), ballVisible(false), lastKnownBallPos(0, 0), ballInFront(false),
+      currentState(new SearchState()) {}
+
+Striker::Striker(const Striker& other)
+    : Robot(other), camera(other.camera), currentVisionArea(other.currentVisionArea),
+      ballVisible(other.ballVisible), lastKnownBallPos(other.lastKnownBallPos),
+      ballInFront(other.ballInFront), currentState(nullptr) {
+    if (other.currentState) {
+        std::string name = other.currentState->getName();
+        if (name == "SEARCH_BALL") currentState = new SearchState();
+        else if (name == "APPROACH_BALL") currentState = new ApproachState();
+        else if (name == "ALIGN_TO_GOAL") currentState = new AlignState();
+        else if (name == "KICK") currentState = new KickState();
+    }
+}
+
+Striker& Striker::operator=(const Striker& other) {
+    if (this != &other) {
+        Robot::operator=(other);
+        camera = other.camera;
+        currentVisionArea = other.currentVisionArea;
+        ballVisible = other.ballVisible;
+        lastKnownBallPos = other.lastKnownBallPos;
+        ballInFront = other.ballInFront;
+        delete currentState;
+        currentState = nullptr;
+        if (other.currentState) {
+            std::string name = other.currentState->getName();
+            if (name == "SEARCH_BALL") currentState = new SearchState();
+            else if (name == "APPROACH_BALL") currentState = new ApproachState();
+            else if (name == "ALIGN_TO_GOAL") currentState = new AlignState();
+            else if (name == "KICK") currentState = new KickState();
+        }
+    }
+    return *this;
+}
+
+Striker::~Striker() {
+    delete currentState;
+}
 
 const CameraSensor& Striker::getCamera() const { return camera; }
 const std::vector<GridCoord>& Striker::getCurrentVisionArea() const { return currentVisionArea; }
-RobotAction Striker::getNextAction() const { return nextAction; }
 bool Striker::isBallVisible() const { return ballVisible; }
+bool Striker::isBallInFront() const { return ballInFront; }
+Vector2D Striker::getLastKnownBallPos() const { return lastKnownBallPos; }
+
+std::string Striker::getStateName() const {
+    return currentState ? currentState->getName() : "IDLE";
+}
+
+void Striker::changeState(StrikerState* newState) {
+    delete currentState;
+    currentState = newState;
+}
 
 void Striker::sense(const Ball& ball) {
     int rRow, rCol, bRow, bCol;
@@ -33,55 +83,14 @@ void Striker::sense(const Ball& ball) {
 void Striker::sense() {}
 
 void Striker::think() {
-    Vector2D goalPos(4.5, 0.0);
-
-    if (ballInFront) {
-        double bearingToGoal = Vector2D::calculateBearing(position, orientation, goalPos);
-        if (std::abs(bearingToGoal) <= 45.0) {
-            nextAction = RobotAction::KICK;
-        } else {
-            nextAction = RobotAction::ALIGN_TO_GOAL;
-        }
-    } else if (ballVisible) {
-        nextAction = RobotAction::APPROACH_BALL;
-    } else {
-        nextAction = RobotAction::SEARCH_BALL;
+    if (ballVisible && currentState && currentState->getName() == "SEARCH_BALL") {
+        changeState(new ApproachState());
     }
 }
 
 void Striker::act(Ball& ball) {
-    Vector2D goalPos(4.5, 0.0);
-
-    switch (nextAction) {
-        case RobotAction::SEARCH_BALL:
-            rotateTowards(orientation + 45.0);
-            break;
-
-        case RobotAction::APPROACH_BALL: {
-            double targetAngle = (lastKnownBallPos - position).angleDeg();
-            double bearing = Vector2D::calculateBearing(position, orientation, lastKnownBallPos);
-            if (std::abs(bearing) > 20.0) {
-                rotateTowards(targetAngle, 45.0);
-            } else {
-                moveForward(0.5);
-            }
-            break;
-        }
-
-        case RobotAction::ALIGN_TO_GOAL: {
-            double goalAngle = (goalPos - position).angleDeg();
-            rotateTowards(goalAngle, 45.0);
-            break;
-        }
-
-        case RobotAction::KICK: {
-            if (!ballInFront) {
-                throw InvalidKickException();
-            }
-            Vector2D kickDir = goalPos - ball.getPosition();
-            ball.kick(kickDir, 3.0);
-            break;
-        }
+    if (currentState) {
+        currentState->handle(*this, ball);
     }
 }
 

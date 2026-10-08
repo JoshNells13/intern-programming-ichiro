@@ -5,40 +5,39 @@
 #include "CameraSensor.hpp"
 #include "Exceptions.hpp"
 #include "Ball.hpp"
+#include <vector>
+#include <string>
 
-enum class RobotAction {
-    SEARCH_BALL,
-    APPROACH_BALL,
-    ALIGN_TO_GOAL,
-    KICK
-};
+class StrikerState;
 
 class Striker : public Robot {
 private:
-    CameraSensor camera; // Composition (HAS-A)
+    CameraSensor camera;
     std::vector<GridCoord> currentVisionArea;
     bool ballVisible;
     Vector2D lastKnownBallPos;
     bool ballInFront;
-    RobotAction nextAction;
+    StrikerState* currentState;
 
 public:
     Striker();
     Striker(double x, double y, double orientationDeg = 0.0);
+    Striker(const Striker& other);
+    Striker& operator=(const Striker& other);
+    ~Striker() override;
 
     const CameraSensor& getCamera() const;
     const std::vector<GridCoord>& getCurrentVisionArea() const;
-    RobotAction getNextAction() const;
     bool isBallVisible() const;
+    bool isBallInFront() const;
+    Vector2D getLastKnownBallPos() const;
+    std::string getStateName() const;
 
-    // Sense: membaca data melalui kamera
+    void changeState(StrikerState* newState);
+
     void sense(const Ball& ball);
     void sense() override;
-
-    // Think: menentukan aksi berikutnya
     void think() override;
-
-    // Act: mengeksekusi aksi
     void act(Ball& ball);
     void act() override;
 };
