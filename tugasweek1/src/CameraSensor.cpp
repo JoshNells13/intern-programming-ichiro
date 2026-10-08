@@ -6,103 +6,58 @@
 CameraSensor::CameraSensor() {}
 
 std::vector<GridCoord> CameraSensor::getVisionArea(int rRow, int rCol, double orientationDeg) const {
-    std::vector<GridCoord> visionCells;
-    std::set<std::pair<int, int>> uniqueCells;
+    std::vector<GridCoord> vision;
+    std::set<std::pair<int, int>> visited;
 
     double normAngle = orientationDeg;
     while (normAngle < 0.0) normAngle += 360.0;
     while (normAngle >= 360.0) normAngle -= 360.0;
 
-    int dirIndex = static_cast<int>(std::round(normAngle / 45.0)) % 8;
+    int dir = static_cast<int>(std::round(normAngle / 90.0)) % 4;
+    // 0: Kanan (0 deg), 1: Atas (90 deg), 2: Kiri (180 deg), 3: Bawah (270 deg)
 
-    auto addCell = [&](int r, int c) {
+    auto add = [&](int r, int c) {
         if (r >= 0 && r < Field::ROWS && c >= 0 && c < Field::COLS) {
             if (r != rRow || c != rCol) {
-                if (uniqueCells.insert({r, c}).second) {
-                    visionCells.push_back({r, c});
+                if (visited.insert({r, c}).second) {
+                    vision.push_back({r, c});
                 }
             }
         }
     };
 
-    switch (dirIndex) {
-        case 0: // Kanan (0 deg) - Sesuai gambar contoh
-            for (int d = 1; d <= 3; d++) {
-                for (int w = -d; w <= d; w++) {
-                    addCell(rRow + w, rCol + d);
-                }
+    if (dir == 0) { // Kanan (0 deg) - Persis sesuai contoh
+        for (int d = 1; d <= 3; d++) {
+            for (int w = -d; w <= d; w++) {
+                add(rRow + w, rCol + d);
             }
-            break;
-
-        case 2: // Atas (90 deg)
-            for (int d = 1; d <= 3; d++) {
-                for (int w = -d; w <= d; w++) {
-                    addCell(rRow - d, rCol + w);
-                }
+        }
+    } else if (dir == 1) { // Atas (90 deg)
+        for (int d = 1; d <= 3; d++) {
+            for (int w = -d; w <= d; w++) {
+                add(rRow - d, rCol + w);
             }
-            break;
-
-        case 4: // Kiri (180 deg)
-            for (int d = 1; d <= 3; d++) {
-                for (int w = -d; w <= d; w++) {
-                    addCell(rRow + w, rCol - d);
-                }
+        }
+    } else if (dir == 2) { // Kiri (180 deg)
+        for (int d = 1; d <= 3; d++) {
+            for (int w = -d; w <= d; w++) {
+                add(rRow + w, rCol - d);
             }
-            break;
-
-        case 6: // Bawah (270 deg)
-            for (int d = 1; d <= 3; d++) {
-                for (int w = -d; w <= d; w++) {
-                    addCell(rRow + d, rCol + w);
-                }
+        }
+    } else if (dir == 3) { // Bawah (270 deg)
+        for (int d = 1; d <= 3; d++) {
+            for (int w = -d; w <= d; w++) {
+                add(rRow + d, rCol + w);
             }
-            break;
-
-        case 1: // Kanan-Atas (45 deg)
-            for (int d = 1; d <= 3; d++) {
-                for (int k = 0; k <= d; k++) {
-                    addCell(rRow - d, rCol + k);
-                    addCell(rRow - k, rCol + d);
-                }
-            }
-            break;
-
-        case 3: // Kiri-Atas (135 deg)
-            for (int d = 1; d <= 3; d++) {
-                for (int k = 0; k <= d; k++) {
-                    addCell(rRow - d, rCol - k);
-                    addCell(rRow - k, rCol - d);
-                }
-            }
-            break;
-
-        case 5: // Kiri-Bawah (225 deg)
-            for (int d = 1; d <= 3; d++) {
-                for (int k = 0; k <= d; k++) {
-                    addCell(rRow + d, rCol - k);
-                    addCell(rRow + k, rCol - d);
-                }
-            }
-            break;
-
-        case 7: // Kanan-Bawah (315 deg)
-            for (int d = 1; d <= 3; d++) {
-                for (int k = 0; k <= d; k++) {
-                    addCell(rRow + d, rCol + k);
-                    addCell(rRow + k, rCol + d);
-                }
-            }
-            break;
+        }
     }
 
-    return visionCells;
+    return vision;
 }
 
 bool CameraSensor::detectBall(const std::vector<GridCoord>& visionArea, int bRow, int bCol) const {
-    for (const auto& cell : visionArea) {
-        if (cell.row == bRow && cell.col == bCol) {
-            return true;
-        }
+    for (const auto& c : visionArea) {
+        if (c.row == bRow && c.col == bCol) return true;
     }
     return false;
 }
@@ -112,19 +67,13 @@ bool CameraSensor::isBallInFront(int rRow, int rCol, double orientationDeg, int 
     while (normAngle < 0.0) normAngle += 360.0;
     while (normAngle >= 360.0) normAngle -= 360.0;
 
-    int dirIndex = static_cast<int>(std::round(normAngle / 45.0)) % 8;
-
-    int fRow = 0, fCol = 0;
-    switch (dirIndex) {
-        case 0: fRow = 0;  fCol = 1;  break;
-        case 1: fRow = -1; fCol = 1;  break;
-        case 2: fRow = -1; fCol = 0;  break;
-        case 3: fRow = -1; fCol = -1; break;
-        case 4: fRow = 0;  fCol = -1; break;
-        case 5: fRow = 1;  fCol = -1; break;
-        case 6: fRow = 1;  fCol = 0;  break;
-        case 7: fRow = 1;  fCol = 1;  break;
+    int dir = static_cast<int>(std::round(normAngle / 90.0)) % 4;
+    int fR = 0, fC = 0;
+    switch (dir) {
+        case 0: fR = 0;  fC = 1;  break; // Kanan
+        case 1: fR = -1; fC = 0;  break; // Atas
+        case 2: fR = 0;  fC = -1; break; // Kiri
+        case 3: fR = 1;  fC = 0;  break; // Bawah
     }
-
-    return (rRow + fRow == bRow && rCol + fCol == bCol);
+    return (rRow + fR == bRow && rCol + fC == bCol);
 }

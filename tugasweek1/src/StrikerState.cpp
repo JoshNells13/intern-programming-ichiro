@@ -4,19 +4,19 @@
 #include "Field.hpp"
 #include "Exceptions.hpp"
 #include <cmath>
-#include <vector>
 
-static int searchRotateCount = 0;
+static int searchCount = 0;
 
 void SearchState::handle(Striker& striker, Ball& ball) {
     if (striker.isBallVisible()) {
-        searchRotateCount = 0;
+        searchCount = 0;
         striker.changeState(new ApproachState());
     } else {
-        searchRotateCount++;
-        striker.rotateTowards(striker.getOrientation() + 45.0);
-        if (searchRotateCount % 4 == 0) {
-            striker.moveForward(0.5);
+        searchCount++;
+        // Muter 90 derajat setiap tick
+        striker.rotateTowards(striker.getOrientation() + 90.0, 90.0);
+        if (searchCount % 2 == 0 && striker.getPosition().x < 2.5) {
+            striker.setPosition(striker.getPosition().x + 0.5, striker.getPosition().y);
         }
     }
 }
@@ -27,58 +27,47 @@ void ApproachState::handle(Striker& striker, Ball& ball) {
         return;
     }
 
-    if (striker.isBallInFront()) {
+    int rRow, rCol, bRow, bCol;
+    Field::worldToGrid(striker.getPosition(), rRow, rCol);
+    Field::worldToGrid(ball.getPosition(), bRow, bCol);
+
+    int targetRow = bRow;
+    int targetCol = bCol - 1;
+
+    // Jika robot sudah berada tepat di belakang bola
+    if (rRow == targetRow && rCol == targetCol) {
+        striker.setOrientation(0.0); // Hadapkan ke kanan (0 deg) ke arah gawang
         striker.changeState(new AlignState());
         return;
     }
 
-    Vector2D targetPos = striker.getLastKnownBallPos();
-    double bearing = Vector2D::calculateBearing(striker.getPosition(), striker.getOrientation(), targetPos);
-
-    if (std::abs(bearing) > 20.0) {
-        double targetAngle = (targetPos - striker.getPosition()).angleDeg();
-        striker.rotateTowards(targetAngle, 45.0);
-    } else {
+    // Gerakkan robot mendekat ke posisi belakang bola (targetRow, targetCol)
+    if (rCol < targetCol) {
+        striker.setOrientation(0.0);
+        striker.moveForward(0.5);
+    } else if (rCol > targetCol) {
+        striker.setOrientation(180.0);
+        striker.moveForward(0.5);
+    } else if (rRow < targetRow) {
+        striker.setOrientation(270.0);
+        striker.moveForward(0.5);
+    } else if (rRow > targetRow) {
+        striker.setOrientation(90.0);
         striker.moveForward(0.5);
     }
 }
 
 void AlignState::handle(Striker& striker, Ball& ball) {
-    if (!striker.isBallInFront()) {
-        striker.changeState(new ApproachState());
-        return;
-    }
+    int rRow, rCol, bRow, bCol;
+    Field::worldToGrid(striker.getPosition(), rRow, rCol);
+    Field::worldToGrid(ball.getPosition(), bRow, bCol);
 
-    // Cek apakah ada di antara 3 opsi tendangan (lurus, +45, -45) yang bisa langsung gol
-    double currentHeading = striker.getOrientation();
-    std::vector<double> candidates = {
-        currentHeading,
-        Vector2D::normalizeAngle(currentHeading + 45.0),
-        Vector2D::normalizeAngle(currentHeading - 45.0)
-    };
-
-    bool canScore = false;
-    for (double ang : candidates) {
-        double rad = ang * PI / 180.0;
-        double dx = std::cos(rad);
-        double dy = std::sin(rad);
-
-        if (dx > 0.1) {
-            double distToGoalLine = 4.5 - ball.getPosition().x;
-            double projectedY = ball.getPosition().y + (dy / dx) * distToGoalLine;
-            if (projectedY >= -1.5 && projectedY <= 1.5) {
-                canScore = true;
-                break;
-            }
-        }
-    }
-
-    if (canScore) {
+    // Pastikan robot menghadap kanan (0 deg) dan bola tepat 1 petak di depan robot
+    if (rRow == bRow && rCol + 1 == bCol) {
+        striker.setOrientation(0.0);
         striker.changeState(new KickState());
     } else {
-        Vector2D goalCenter(4.5, 0.0);
-        double targetAngle = (goalCenter - striker.getPosition()).angleDeg();
-        striker.rotateTowards(targetAngle, 45.0);
+        striker.changeState(new ApproachState());
     }
 }
 
@@ -87,38 +76,7 @@ void KickState::handle(Striker& striker, Ball& ball) {
         throw InvalidKickException();
     }
 
-    double currentHeading = striker.getOrientation();
-
-    // 3 opsi tendangan: Lurus, Miring Atas (+45), Miring Bawah (-45)
-    std::vector<double> candidates = {
-        currentHeading,
-        Vector2D::normalizeAngle(currentHeading + 45.0),
-        Vector2D::normalizeAngle(currentHeading - 45.0)
-    };
-
-    double bestAngle = currentHeading;
-    double bestDistToCenter = 9999.0;
-
-    for (double ang : candidates) {
-        double rad = ang * PI / 180.0;
-        double dx = std::cos(rad);
-        double dy = std::sin(rad);
-
-        if (dx > 0.1) {
-            double distToGoalLine = 4.5 - ball.getPosition().x;
-            double projectedY = ball.getPosition().y + (dy / dx) * distToGoalLine;
-
-            if (projectedY >= -1.5 && projectedY <= 1.5) {
-                double dist = std::abs(projectedY);
-                if (dist < bestDistToCenter) {
-                    bestDistToCenter = dist;
-                    bestAngle = ang;
-                }
-            }
-        }
-    }
-
-    double bestRad = bestAngle * PI / 180.0;
-    Vector2D kickDir(std::cos(bestRad), std::sin(bestRad));
+    // Tendang bola lurus ke arah gawang (x = 4.5, y = ball.y)
+    Vector2D kickDir(1.0, 0.0);
     ball.kick(kickDir, 3.0);
 }

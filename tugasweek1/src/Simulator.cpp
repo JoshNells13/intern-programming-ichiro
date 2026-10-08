@@ -3,7 +3,6 @@
 
 Simulator::Simulator(const Striker& s, const Ball& b, int maxTicks)
     : striker(s), ball(b), tick(0), maxTicks(maxTicks), goalScored(false) {
-    // Inisialisasi awal sensor kamera '@'
     striker.sense(ball);
 }
 
@@ -20,16 +19,15 @@ void Simulator::step() {
     try {
         striker.act(ball);
     } catch (const RobotException& e) {
-        // Exception tertangani
     }
 
-    // 4. UPDATE BALL PHYSICS
+    // 4. UPDATE BALL
     ball.update();
 
-    // Update sensor setelah pergerakan
+    // 5. UPDATE SENSOR SETELAH AKSI
     striker.sense(ball);
 
-    // Cek gol
+    // 6. CEK GOL
     if (Field::isGoal(ball.getPosition())) {
         goalScored = true;
     }
@@ -38,19 +36,19 @@ void Simulator::step() {
 void Simulator::render() const {
     Field displayField;
 
-    // Gambar area pandang sensor '@'
+    // Gambar sensor kamera '@'
     const auto& vision = striker.getCurrentVisionArea();
-    for (const auto& coord : vision) {
-        displayField.setCell(coord.row, coord.col, '@');
+    for (const auto& c : vision) {
+        displayField.setCell(c.row, c.col, '@');
     }
 
-    // Gambar posisi bola 'O'
+    // Gambar bola 'O'
     int bRow, bCol;
     if (Field::worldToGrid(ball.getPosition(), bRow, bCol)) {
         displayField.setCell(bRow, bCol, 'O');
     }
 
-    // Gambar posisi robot 'R'
+    // Gambar robot 'R'
     int rRow, rCol;
     if (Field::worldToGrid(striker.getPosition(), rRow, rCol)) {
         displayField.setCell(rRow, rCol, 'R');
