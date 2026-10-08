@@ -3,6 +3,13 @@
 
 class Robot{
 
+public:
+
+
+    virtual void Think(){
+
+    }
+
 };
 
 
