@@ -49,10 +49,14 @@ bool Field::isGoal(const Vector2D& pos) {
 }
 
 void Field::display() const {
+    std::cout << "\033[H";  
     for (int r = 0; r < ROWS; r++) {
         for (int c = 0; c < COLS; c++) {
+            out += grid[r][c];
             std::cout << grid[r][c] << (c == COLS - 1 ? "" : " ");
         }
-        std::cout << "\n";
+            out += "\033[K\n";
     }
+        out += "\033[J";
+        std::cout << "\033[J" << std::flush;
 }

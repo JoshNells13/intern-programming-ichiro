@@ -89,69 +89,143 @@ stateDiagram-v2
 
 ```mermaid
 classDiagram
+    direction TB
+
     class Vector2D {
         +double x
         +double y
         +distanceTo(Vector2D) double
         +angleDeg() double
-        +normalizeAngle(double) double
-        +calculateBearing(Vector2D, double, Vector2D) double
+        +normalizeAngle(double)$ double
+        +calculateBearing(Vector2D, double, Vector2D)$ double
+    }
+
+    class Field {
+        +int ROWS$
+        +int COLS$
+        +double CELL_SIZE$
+        -char grid[12][18]
+        +worldToGrid(Vector2D, int, int)$ bool
+        +gridToWorld(int, int)$ Vector2D
+        +isGoal(Vector2D)$ bool
+        +display()
     }
 
     class Ball {
         -Vector2D position
         -Vector2D velocity
         -double speed
+        +getPosition() Vector2D
+        +setPosition(Vector2D)
         +kick(Vector2D, double)
         +update()
-    }
-
-    class Field {
-        +int ROWS
-        +int COLS
-        +worldToGrid()
-        +gridToWorld()
-        +isGoal()
-        +display()
+        +stop()
     }
 
     class CameraSensor {
-        +getVisionArea()
-        +detectBall()
-        +isBallInFront()
+        +getVisionArea(int, int, double) vector
+        +detectBall(vector, int, int) bool
+        +isBallInFront(int, int, double, int, int) bool
     }
 
     class Robot {
         <<abstract>>
         #Vector2D position
         #double orientation
+        #double speed
+        #double maxSpeed
         +sense()*
         +think()*
         +act()*
+        +rotateTowards(double, double)
+        +moveForward(double)
     }
 
     class Striker {
         -CameraSensor camera
         -StrikerState* currentState
+        -bool ballVisible
+        -bool ballInFront
+        -Vector2D lastKnownBallPos
         +sense(Ball)
         +think()
         +act(Ball)
         +changeState(StrikerState*)
+        +getStateName() string
     }
 
     class StrikerState {
         <<interface>>
         +handle(Striker, Ball)*
-        +getName()*
+        +getName()* string
     }
 
-    Robot <|-- Striker : Inheritance
-    Striker *-- CameraSensor : Composition
-    Striker o-- StrikerState : State Pattern
-    StrikerState <|.. SearchState
-    StrikerState <|.. ApproachState
-    StrikerState <|.. AlignState
-    StrikerState <|.. KickState
+    class SearchState {
+        +handle(Striker, Ball)
+        +getName() string
+    }
+
+    class ApproachState {
+        +handle(Striker, Ball)
+        +getName() string
+    }
+
+    class AlignState {
+        +handle(Striker, Ball)
+        +getName() string
+    }
+
+    class KickState {
+        +handle(Striker, Ball)
+        +getName() string
+    }
+
+    class Simulator {
+        -Field field
+        -Ball ball
+        -Striker striker
+        -int tick
+        -int maxTicks
+        -bool goalScored
+        +step()
+        +run()
+        +render()
+        +isGoal() bool
+    }
+
+    class RobotException {
+        #string message
+        +what() char*
+    }
+
+    class InvalidKickException {
+        +InvalidKickException(string)
+    }
+
+    %% Hierarki & Relasi Utama
+    Robot <|-- Striker : Inheritance (is-a)
+    Robot *-- Vector2D : Composition
+    Ball *-- Vector2D : Composition
+
+    %% Komposisi Sensor & Komponen Simulator
+    Striker *-- CameraSensor : Composition (has-a)
+    Simulator *-- Field : Composition
+    Simulator *-- Ball : Composition
+    Simulator *-- Striker : Composition
+
+    %% State Pattern
+    Striker o-- StrikerState : Aggregation (State Pattern)
+    StrikerState <|.. SearchState : Realization
+    StrikerState <|.. ApproachState : Realization
+    StrikerState <|.. AlignState : Realization
+    StrikerState <|.. KickState : Realization
+
+    %% Relasi Ketergantungan (Dependency)
+    Striker ..> Ball : Dependency (Senses & Acts)
+    StrikerState ..> Striker : Dependency (Controls)
+    StrikerState ..> Ball : Dependency (Manipulates)
+    KickState ..> InvalidKickException : Throws
+    RobotException <|-- InvalidKickException : Inheritance
 ```
 
 ---
