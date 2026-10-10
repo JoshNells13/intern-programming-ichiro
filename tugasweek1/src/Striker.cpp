@@ -5,16 +5,17 @@
 
 Striker::Striker()
     : Robot(), ballVisible(false), lastKnownBallPos(0, 0), ballInFront(false),
-      currentState(new SearchState()) {}
+      currentState(new SearchState()), kickMode(1), lastKickType("-") {}
 
 Striker::Striker(double x, double y, double orientationDeg)
     : Robot(x, y, orientationDeg), ballVisible(false), lastKnownBallPos(0, 0), ballInFront(false),
-      currentState(new SearchState()) {}
+      currentState(new SearchState()), kickMode(1), lastKickType("-") {}
 
 Striker::Striker(const Striker& other)
     : Robot(other), camera(other.camera), currentVisionArea(other.currentVisionArea),
       ballVisible(other.ballVisible), lastKnownBallPos(other.lastKnownBallPos),
-      ballInFront(other.ballInFront), currentState(nullptr) {
+      ballInFront(other.ballInFront), currentState(nullptr), kickMode(other.kickMode),
+      lastKickType(other.lastKickType) {
     if (other.currentState) {
         std::string name = other.currentState->getName();
         if (name == "SEARCH_BALL") currentState = new SearchState();
@@ -58,6 +59,11 @@ Vector2D Striker::getLastKnownBallPos() const { return lastKnownBallPos; }
 std::string Striker::getStateName() const {
     return currentState ? currentState->getName() : "IDLE";
 }
+
+int Striker::getKickMode() const { return kickMode; }
+void Striker::setKickMode(int mode) { kickMode = mode; }
+std::string Striker::getLastKickType() const { return lastKickType; }
+void Striker::setLastKickType(const std::string& type) { lastKickType = type; }
 
 void Striker::changeState(StrikerState* newState) {
     delete currentState;

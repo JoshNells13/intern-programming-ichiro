@@ -18,6 +18,8 @@ private:
     Vector2D lastKnownBallPos;
     bool ballInFront;
     StrikerState* currentState;
+    int kickMode;
+    std::string lastKickType;
 
 public:
     Striker();
@@ -32,6 +34,11 @@ public:
     bool isBallInFront() const;
     Vector2D getLastKnownBallPos() const;
     std::string getStateName() const;
+
+    int getKickMode() const;
+    void setKickMode(int mode);
+    std::string getLastKickType() const;
+    void setLastKickType(const std::string& type);
 
     void changeState(StrikerState* newState);
 

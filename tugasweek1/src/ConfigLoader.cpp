@@ -26,7 +26,7 @@ SimConfig ConfigLoader::loadFromFile(const std::string& filename) {
                 else if (key == "BALL_Y") config.ballY = std::stod(val);
                 else if (key == "MAX_TICKS") config.maxTicks = std::stoi(val);
             } catch (...) {
-                // Gunakan default value jika format salah
+                //Pakai Nilai Default ygy
             }
         }
     }
