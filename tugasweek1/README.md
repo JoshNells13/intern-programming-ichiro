@@ -141,6 +141,24 @@ stateDiagram-v2
 
 ---
 
+## Garis Besar Algoritma & Lintasan (Path Planning)
+
+### 1. Algoritma yang Digunakan
+- **Sense-Think-Act Cycle**: Arsitektur siklus per-tick yang membagi alur kerja robot menjadi pemindaian sensor, evaluasi kondisi, dan eksekusi aksi.
+- **Finite State Machine (FSM / State Pattern)**:
+  - **Search**: Rotasi $360^\circ$ (putar $90^\circ$/tick) untuk menyapu area pandang, dilanjutkan patroli *waypoints* jika bola belum terlihat.
+  - **Approach**: Navigasi berbasis grid menuju posisi tembak di belakang bola ($\text{bCol} - 1$) yang dilengkapi logika manuver menghindar ke samping (*anti-collision*) agar tidak mendorong bola ke belakang.
+  - **Align**: Validasi penjajaran sudut hadap lurus menghadap gawang lawan ($0^\circ$).
+  - **Kick**: Pengambilan keputusan arah tembak (lurus jika sejajar gawang, diagonal jika berada di sudut/sisi luar) serta perhitungan kecepatan tendangan terukur berdasarkan model deselerasi bola.
+- **Vision FOV Triangulation**: Pemetaan area pandang segitiga sensor kamera (jangkauan 3 tingkat, lebar 7 petak) sesuai orientasi robot.
+
+### 2. Lintasan (Path) yang Dipakai
+- **Lintasan Patroli / Pencarian**: Rute 7 titik *waypoint* strategis yang disusuri robot secara siklis jika bola belum ditemukan:
+  $$(0.0, 1.5) \longrightarrow (2.0, 1.5) \longrightarrow (2.0, -1.5) \longrightarrow (0.0, -1.5) \longrightarrow (-2.5, -1.5) \longrightarrow (-2.5, 1.5) \longrightarrow (-1.0, 0.0)$$
+- **Lintasan Pendekatan Bola**: Jalur pendekatan grid bertahap (menyelaraskan baris $Y$ terlebih dahulu, kemudian mendekati kolom $X$) dengan deviasi jalur memutar jika robot berada di sisi depan bola.
+
+---
+
 ## Struktur & Alur Relasi Antar-File
 
 Struktur kode diatur secara modular memisahkan antarmuka (*header* `.hpp`) di folder `include/` dan implementasi (*source* `.cpp`) di folder `src/`:
